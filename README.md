@@ -19,6 +19,25 @@ voltage: 3-5V
 
 ## Host side application
 
+### Dependencies
+
+* Python 3.14
+  * bleak
+  * shutil
+* BlueZ
+
+### Compilation
+
 ## ESP32
 
+### Dependencies
+
+### Compilation
+
 ## STM32
+
+### Dependencies
+
+### Compilation
+
+## BlueTooth Protocol
