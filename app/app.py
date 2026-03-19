@@ -21,50 +21,38 @@
 import bleak    # bluetooth lib
 import shutil   # shell utilities
 import signal   # signal catching
+import curses   # terminal printing
 
 # Globals ----------------------------------------------------------------------
-terminal_columns = -1 # terminal width in characters
-terminal_lines   = -1 # terminal height in characters
-
 
 # Handlers ---------------------------------------------------------------------
-
-def handle_resize(signum, frame):
-    global terminal_columns, terminal_lines
-    assert signum == signal.SIGWINCH, f"Unexpected signal: {signum}"
-    terminal_columns = shutil.get_terminal_size().columns
-    terminal_lines = shutil.get_terminal_size().lines
-    
-# end handle_resize
-
 
 # Helper functions -------------------------------------------------------------
 
 
 # Main -------------------------------------------------------------------------
 
-def main(argv):
+def main(stdscr):
 
-    global terminal_columns, terminal_lines
-    
-    signal.signal(signal.SIGWINCH, handle_resize)
+    # curses setup
+    curses.noecho() # turns off automatic echoing of keys to screen
     
     # maybe take CLA for size of device area, as in x centimeters of device
     # movement translates to y characters on the terminal
     
-    terminal_columns = shutil.get_terminal_size().columns
-    terminal_lines   = shutil.get_terminal_size().lines
+    #terminal_columns = shutil.get_terminal_size().columns
+    #terminal_lines   = shutil.get_terminal_size().lines
 
-    print(terminal_columns)
+    #print(terminal_columns)
+    #print(terminal_lines)
     
     while(1):
-        assert (terminal_columns != -1 and terminal_lines != -1)
+        #assert (terminal_columns != -1 and terminal_lines != -1)
         
+        stdscr.refresh()
         
     #end while
     
 # end main
 
-if __name__ == "__main__":
-    import sys
-    main(sys.argv)
+curses.wrapper(main) # curses wrapper calls main
