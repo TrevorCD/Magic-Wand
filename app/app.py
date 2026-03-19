@@ -25,7 +25,6 @@ import curses   # terminal printing
 
 # Globals ----------------------------------------------------------------------
 resizes = 0
-# Handlers ---------------------------------------------------------------------
 
 # Helper functions -------------------------------------------------------------
 
@@ -44,6 +43,9 @@ def main(stdscr):
     # end resize_handler
     signal.signal(signal.SIGWINCH, resize_handler)
 
+    def keypress_q():
+        exit()
+    # end keypress_q
     
     # curses extra setup
     curses.noecho() # turns off automatic echoing of keys to screen
@@ -60,7 +62,7 @@ def main(stdscr):
 
         key = stdscr.getch()
         if key == ord('q'):
-            break
+            keypress_q()
         # endif
         
     #end while
