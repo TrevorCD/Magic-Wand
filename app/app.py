@@ -36,10 +36,59 @@ class Style:
     BLUE   = '\033[34m'
     PURPLE = '\033[35m'
     CYAN   = '\033[36m'
+    
     BOLD   = '\033[1m'
     RESET  = '\033[0m'
+    
+    RED_BOLD    = '\033[1;31m'
+    GREEN_BOLD  = '\033[1;32m'
+    YELLOW_BOLD = '\033[1;33m'
+    BLUE_BOLD   = '\033[1;34m'
+    PURPLE_BOLD = '\033[1;35m'
+    CYAN_BOLD   = '\033[1;36m'
 
 # Helper functions -------------------------------------------------------------
+
+async def bluetooth_connect() -> BLEDevice:
+    
+    # find bluetooth device
+    print(f"{Style.BOLD}Bluetooth devices available:\n{Style.RESET}")
+    devices = await bleak.BleakScanner.discover()
+    i = 0
+    for d in devices:
+        print(f"{Style.BOLD}{i}: {Style.RESET}{d.address}: {Style.BOLD}{d.name}{Style.RESET}")
+        i += 1
+
+    if i == 0:
+        print(f"{Style.RED_BOLD}Failed to find any bluetooth devices{Style.RESET}")
+        return None
+    
+    # select bluetooth device
+    print(f"\n{Style.BOLD}Enter number to select device{Style.RESET}")
+    selection = -1
+    while True:
+        try:
+            selection = int(input())
+            assert (selection < i) and (selection > -1)
+            print(f"{Style.GREEN_BOLD}Selected device {selection}: {devices[selection]}{Style.RESET}")
+            break;
+        except ValueError:
+            print(f"{Style.RED_BOLD}Invalid input. Enter a number{Style.RESET}")
+        except AssertionError:
+            print(f"{Style.RED_BOLD}Enter a number that corresponds to a device{Style.RESET}")
+
+    # connect to bluetooth device
+    client = bleak.BleakClient(devices[selection].address)
+    try:
+        await client.connect()
+        model_number = await client.read_gatt_char(MODEL_NBR_UUID)
+        print(f"Model Number: {model_number.decode()}")
+    except Exception:
+        print(f"{Style.RED_BOLD}Failed to connect to bluetooth device{Style.RESET}")
+        return None
+
+    print(f"{Style.BLUE_BOLD}Bluetooth device connected{Style.RESET}")
+    return devices[selection]
 
 # Main -------------------------------------------------------------------------
 
@@ -49,7 +98,7 @@ async def main():
         size = shutil.get_terminal_size()
         curses.resizeterm(size.lines, size.columns)
         stdscr.refresh()
-    # end resize_handler
+
     signal.signal(signal.SIGWINCH, resize_handler)
     
     def keypress_q():
@@ -59,35 +108,12 @@ async def main():
         curses.echo()
         curses.endwin()
         exit()
-    # end keypress_q
+
     
-    # find bluetooth device
-    print(f"{Style.BOLD}Bluetooth devices available:{Style.RESET}")
-    devices = await bleak.BleakScanner.discover()
-    i = 0
-    for d in devices:
-        print(f"{i}: {d}")
-        i += 1
-        
-    # select bluetooth device
-    print("\nEnter number to select device")
-
-    selection = -1
-    while True:
-        try:
-            selection = int(input())
-            assert (selection < i) and (selection > -1)
-            print(f"selected device {selection}: {devices[selection]}")
-            break;
-        except ValueError:
-            print("\nInvalid input. Enter a number")
-        except AssertionError:
-            print("\nInvalid input. Enter a number that corresponds to a device")
-    # end while
+    device = await bluetooth_connect()
+    if device == None:
+        exit()
     
-    # connect to bluetooth device
-
-
     # before starting curses, prompt for any key
     print(f"{Style.BOLD}Press enter to start magic drawing board{Style.RESET}")
     input()
@@ -113,10 +139,5 @@ async def main():
             case 113: # 'q'
                 keypress_q()
                 
-        # endif
-        
-    #end while
-    
-# end main
 
 asyncio.run(main())
