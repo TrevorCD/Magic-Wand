@@ -18,6 +18,7 @@
 #   limitations under the License.
 #-------------------------------------------------------------------------------
 
+import asyncio
 import bleak    # bluetooth lib
 import shutil   # shell utilities
 import signal   # signal catching
@@ -25,13 +26,13 @@ import curses   # terminal printing
 
 # Globals ----------------------------------------------------------------------
 resizes = 0
-
+screen = None
 # Helper functions -------------------------------------------------------------
 
 
 # Main -------------------------------------------------------------------------
 
-def main(stdscr):
+async def main():
     
     def resize_handler(signum, frame):
         global resizes
@@ -42,14 +43,27 @@ def main(stdscr):
         stdscr.refresh()
     # end resize_handler
     signal.signal(signal.SIGWINCH, resize_handler)
-
+    
     def keypress_q():
+        curses.nocbreak()
+        stdscr.keypad(False)
+        #stdscr.nodelay(False)
+        curses.echo()
+        curses.endwin()
         exit()
     # end keypress_q
     
-    # curses extra setup
+    # curses setup
+    stdscr = curses.initscr()
     curses.noecho() # turns off automatic echoing of keys to screen
+    curses.cbreak()
     stdscr.nodelay(True) # makes getch() non-blocking
+    stdscr.keypad(True)
+    
+    # find bluetooth device
+    devices = await bleak.BleakScanner.discover()
+    for d in devices:
+        print(d)
     
     # loop for catching bluetooth communication and updating screen
     while(True):
@@ -61,12 +75,14 @@ def main(stdscr):
         stdscr.refresh()
 
         key = stdscr.getch()
-        if key == ord('q'):
-            keypress_q()
+        match key:
+            case 113: # 'q'
+                keypress_q()
+                
         # endif
         
     #end while
     
 # end main
 
-curses.wrapper(main) # curses wrapper calls main
+asyncio.run(main())
