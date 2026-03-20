@@ -26,7 +26,7 @@ import curses   # terminal printing
 
 # Globals ----------------------------------------------------------------------
 resizes = 0
-screen = None
+
 # Helper functions -------------------------------------------------------------
 
 
@@ -53,18 +53,37 @@ async def main():
         exit()
     # end keypress_q
     
+    # find bluetooth device
+    devices = await bleak.BleakScanner.discover()
+    i = 0
+    for d in devices:
+        print(f"{i}: {d}")
+        i += 1
+        
+    # select bluetooth device
+    print("Enter number to select device")
+
+    selection = -1
+    while True:
+        try:
+            selection = int(input())
+            assert selection < i
+            print(f"selected device {selection}: {devices[selection]}")
+            break;
+        except ValueError:
+            print("Invalid input. Enter a number")
+        except AssertionError:
+            print("Invalid input. Enter a number that corresponds to a device")
+
+    await asyncio.sleep(0)
+    
     # curses setup
     stdscr = curses.initscr()
     curses.noecho() # turns off automatic echoing of keys to screen
     curses.cbreak()
     stdscr.nodelay(True) # makes getch() non-blocking
     stdscr.keypad(True)
-    
-    # find bluetooth device
-    devices = await bleak.BleakScanner.discover()
-    for d in devices:
-        print(d)
-    
+        
     # loop for catching bluetooth communication and updating screen
     while(True):
         # bluetooth comm
