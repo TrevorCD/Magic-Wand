@@ -96,15 +96,9 @@ async def main():
 
     stdscr = None
     client = None
-    
-    def resize_handler(signum, frame):
-        size = shutil.get_terminal_size()
-        curses.resizeterm(size.lines, size.columns)
-        stdscr.refresh()
 
-    signal.signal(signal.SIGWINCH, resize_handler)
-
-    def sigint_handler(signum, frame):
+    # restores window to default state and disconnects BLE client if connected
+    def cleanup_exit():
         if stdscr != None:
             curses.nocbreak()
             stdscr.keypad(False)
@@ -114,18 +108,22 @@ async def main():
         if client != None:
             client.disconnect()
         exit()
-
-    signal.signal(signal.SIGINT, sigint_handler)
     
-    def keypress_q():
-        curses.nocbreak()
-        stdscr.keypad(False)
-        #stdscr.nodelay(False)
-        curses.echo()
-        curses.endwin()
-        client.disconnect()
-        exit()
+    def resize_handler(signum, frame):
+        size = shutil.get_terminal_size()
+        curses.resizeterm(size.lines, size.columns)
+        stdscr.refresh()
 
+    def sigint_handler(signum, frame):
+        cleanup_exit()
+
+    # restores window to defualt state
+    def keypress_q():
+        cleanup_exit()
+
+    # set signal handlers
+    signal.signal(signal.SIGWINCH, resize_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
     
     client = await bluetooth_connect()
     if client == None:
