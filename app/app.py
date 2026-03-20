@@ -28,6 +28,7 @@ import curses   # terminal printing
 # Globals ----------------------------------------------------------------------
 
 # Classes ----------------------------------------------------------------------
+
 class Style:
     RED    = '\033[31m'
     GREEN  = '\033[32m'
@@ -40,14 +41,6 @@ class Style:
 
 # Helper functions -------------------------------------------------------------
 
-def clear_screen():
-    if os.name == 'nt':
-        os.system('cls')
-    else:
-        os.system('clear')
-# end clear_screen
-
-
 # Main -------------------------------------------------------------------------
 
 async def main():
@@ -55,7 +48,6 @@ async def main():
     def resize_handler(signum, frame):
         size = shutil.get_terminal_size()
         curses.resizeterm(size.lines, size.columns)
-        stdscr.addstr(2, 0, f"resizes: {resizes}")
         stdscr.refresh()
     # end resize_handler
     signal.signal(signal.SIGWINCH, resize_handler)
