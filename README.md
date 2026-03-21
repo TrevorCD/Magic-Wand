@@ -17,6 +17,12 @@ voltage: 3-5V
 voltage: 3-5V
 [datasheet](https://www.alldatasheet.com/html-pdf/1140874/TDK/MPU-6500/1463/21/MPU-6500.html)
 
+## Block Diagram
+
+<div width="100%">
+  <img align="center" src="media/BlockDiagram.png" width="100%"/>
+</div>
+
 ## Host side application
 
 ### Dependencies
