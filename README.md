@@ -25,6 +25,11 @@ voltage: 3-5V
 
 ## Host side application
 
+Python Tui application that communicates with the ESP32 over BLE and draws the
+magic wand's movements to the screen.
+
+Run will `make app` or `python3.14 app/app.py`
+
 ### Dependencies
 
 * Python 3.14
@@ -37,7 +42,13 @@ voltage: 3-5V
 
 ### Dependencies
 
+* ArduinoIDE
+* esp32 board package by Espressif Systems
+* ESP32 BLE Arduino
+
 ### Compilation
+
+Use Arduino IDE with the ESP32 Dev Module from Espressif to compile and flash.
 
 ## STM32
 
