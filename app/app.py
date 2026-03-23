@@ -56,7 +56,8 @@ async def bluetooth_connect() -> BleakClient:
     devices = await bleak.BleakScanner.discover()
     i = 0
     for d in devices:
-        print(f"{Style.BLD}{i}: {Style.RST}{d.address}: {Style.BLD}{d.name}{Style.RST}")
+        print(f"{Style.BLD}{i}: {Style.RST}"
+              f"{d.address}: {Style.BLD}{d.name}{Style.RST}")
         i += 1
         
     if i == 0:
@@ -70,19 +71,22 @@ async def bluetooth_connect() -> BleakClient:
         try:
             selection = int(input())
             assert (selection < i) and (selection > -1)
-            print(f"{Style.GRE_BLD}Selected device {selection}: {devices[selection]}{Style.RST}")
+            print(f"{Style.GRE_BLD}Selected device {selection}: "
+                  f"{devices[selection]}{Style.RST}")
             break;
         except ValueError:
             print(f"{Style.RED_BLD}Invalid input. Enter a number{Style.RST}")
         except AssertionError:
-            print(f"{Style.RED_BLD}Enter a number that corresponds to a device{Style.RST}")
+            print(f"{Style.RED_BLD}Enter a number that corresponds to a device"
+                  f"{Style.RST}")
 
     # connect to bluetooth device
     client = bleak.BleakClient(devices[selection].address)
     try:
         await client.connect()
     except Exception:
-        print(f"{Style.RED_BLD}Failed to connect to bluetooth device{Style.RST}")
+        print(f"{Style.RED_BLD}Failed to connect to bluetooth device"
+              f"{Style.RST}")
         return None
 
     print(f"{Style.BLU_BLD}Bluetooth device connected{Style.RST}")
