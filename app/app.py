@@ -99,17 +99,18 @@ async def main():
     stdscr = None
     client = None
     size = size = shutil.get_terminal_size()
+
+    shutdown = False # main loop catches this and exits with ble_cleanup_exit()
     
     # restores window to default state and disconnects BLE client if connected
-    def cleanup_exit():
+    async def ble_cleanup_exit():
+        await client.disconnect()
         if stdscr != None:
             curses.nocbreak()
             stdscr.keypad(False)
             #stdscr.nodelay(False)
             curses.echo()
             curses.endwin()
-        if client != None:
-            client.disconnect()
         exit()
     
     def resize_handler(signum, frame):
@@ -118,11 +119,13 @@ async def main():
         stdscr.refresh()
 
     def sigint_handler(signum, frame):
-        cleanup_exit()
+        if client == None:
+            exit()
+        shutdown = True
 
     # quit
     def keypress_q():
-        cleanup_exit()
+        shutdown = True
 
     # reset screen
     def keypress_r():
@@ -157,8 +160,12 @@ async def main():
     
     # loop for catching bluetooth communication and updating screen
     while True:
+        if shutdown:
+            await ble_cleanup_exit()
+        
         # bluetooth comm
 
+        
         # update screen
         stdscr.addch(old_cursor_y, old_cursor_x, cursor_char)
         stdscr.addch(cursor_y, cursor_x, cursor_char, curses.A_BOLD)
@@ -167,7 +174,8 @@ async def main():
         key = stdscr.getch()
         match key:
             case 113: # 'q' -> quit
-                keypress_q()
+                #keypress_q()
+                await ble_cleanup_exit()
             case 114: # 'r' -> reset screen
                 old_cursor_y = cursor_y
                 old_cursor_x = cursor_x
