@@ -1,6 +1,6 @@
-# Magic Wand
+# ESP32 BLE Wand
 
-
+A wand that transmits accelerometer data (captured by an STM32) to a host machine over Bluetooth Low Energy via an ESP32. Features a host application that draws the wand movements to the terminal.
 
 ## Hardware
 
