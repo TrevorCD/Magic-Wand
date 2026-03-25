@@ -141,26 +141,25 @@ async def main():
 
     service_uuid = "3cd00375-4415-4fe2-aa41-42bd35f1c526"
     characteristic_uuid = "cc84a98c-36be-4fe1-8345-be620545fd34"
-    service_collection = None
-    try:
-        service_collection = client.services
-    except Exception:
-        print(f"{Style.RED}Failed to collect services{Style.RST}")
-        await ble_cleanup_exit()
-    if service_collection[0] == None:
-        print(f"{Style.RED}No services{Style.RST}")
-        await ble_cleanup_exit()
+    #service_collection = None
+    #service_collection = client.services
     
-    service = service_collection[0]
-    if service.uuid != service_uuid:
-        print(f"{Style.RED}Service UUID match failure{Style.RST}")
-        await ble_cleanup_exit()
+    #if service_collection[0] == None:
+    #    print(f"{Style.RED}No services{Style.RST}")
+    #    await ble_cleanup_exit()
 
-    characteristic = service.characteristics[0]
+    #service = None
+    #try:
+    #    service = service_collection.get_service(service_uuid)
+    #except Exception:
+    #    print(f"{Style.RED}Service UUID match failure{Style.RST}")
+    #    await ble_cleanup_exit()
+
+    #characteristic = service.characteristics[0]
         
     # before starting curses, prompt for any key
-    print(f"{Style.BLD}Press enter to start magic drawing board{Style.RST}")
-    input()
+    #print(f"{Style.BLD}Press enter to start magic drawing board{Style.RST}")
+    #input()
     
     # curses setup
     stdscr = curses.initscr()
@@ -184,7 +183,8 @@ async def main():
             await ble_cleanup_exit()
         
         # bluetooth comm
-        test_val = client.read_gatt_char(characteristic, False)
+        test_val = await client.read_gatt_char(characteristic_uuid)
+        test_val = int(test_val[0])
         old_cursor_x = cursor_x
         cursor_x += test_val
         

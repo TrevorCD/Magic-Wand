@@ -3,7 +3,7 @@
  * device side program for magic wand project
  * implements BLE server for communication between stm32 and host
  *
- *------------------------------------------------------------------------------
+ *-----------------------------------------------------------------------------
  *   Copyright 2026 Trevor B. Calderwood
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,8 +25,10 @@
 #include <BLE2902.h>
 
 #define DEBUG 1
-#define READ_TIMEOUT_MS 1000
 
+#define READ_TIMEOUT_MS 5000
+
+/* Globals -------------------------------------------------------------------*/
 /* Global BLE variables */
 BLECharacteristic *pCharacteristic;
 BLEServer *pServer;
@@ -38,9 +40,10 @@ const char * characteristicUUID = "cc84a98c-36be-4fe1-8345-be620545fd34";
 
 /* Global connection state variables */
 int connected;
+int readingStarted; // init 0, set 1 on first read, set 0 on disconnect or timeout
 unsigned long lastReadTime = 0;
 
-/* BLE Callbacks */
+/* BLE Callbacks -------------------------------------------------------------*/
 class ServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       connected = 1;
@@ -51,6 +54,8 @@ class ServerCallbacks: public BLEServerCallbacks {
     }
 
     void onDisconnect(BLEServer* pServer) {
+      connected = 0;
+      readingStarted = 0;
       pAdvertising->start();  // restart advertising
       #if DEBUG
       Serial.println("Disconnected");
@@ -64,9 +69,13 @@ class CharacteristicCallbacks: public BLECharacteristicCallbacks {
     #if DEBUG
     Serial.println("read callback");
     #endif
+    if(readingStarted == 0)
+    {
+      readingStarted = 1;
+    }
     // reset read timeout
     lastReadTime = millis();
-    // get new value from stme32
+    // get new value from stm32
 
     // set new value
     /// for testing:
@@ -74,12 +83,29 @@ class CharacteristicCallbacks: public BLECharacteristicCallbacks {
   }
 };
 
+/* Helper functions ----------------------------------------------------------*/
+void timeout()
+{
+  connected = 0;
+  readingStarted = 0;
+  pAdvertising->start();
+  #if DEBUG
+  Serial.println("Read timeout occured");
+  Serial.println("Advertise start");
+  #endif
+}
+
+/* Main ----------------------------------------------------------------------*/
 void setup()
 {
   #if DEBUG
   Serial.begin(9600);
   #endif
   // pin setup
+
+  // state initialization
+  connected = 0;
+  readingStarted = 0;
 
   // BLE setup
   BLEDevice::init("ESP32MagicWand");
@@ -96,8 +122,6 @@ void setup()
   pCharacteristic->setValue(1);
   pService->start();
 
-  connected = 0; 
-
   pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
 
@@ -109,13 +133,12 @@ void setup()
 
 void loop()
 {
-  if(connected && (lastReadTime + READ_TIMEOUT_MS > millis()))
+  if(connected == 1 && readingStarted == 1 && (lastReadTime + READ_TIMEOUT_MS > millis()))
   {
-    connected = 0;
-    pAdvertising->start();
-    #if DEBUG
-    Serial.println("Read timeout occured");
-    Serial.println("Advertise start");
-    #endif
+    Serial.print("connected: ");
+    Serial.println(connected);
+    Serial.print("ReadingStarted: ");
+    Serial.println(readingStarted);
+    timeout();
   }
 }
