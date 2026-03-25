@@ -185,8 +185,9 @@ async def main():
         # bluetooth comm
         test_val = await client.read_gatt_char(characteristic_uuid)
         test_val = int(test_val[0])
-        old_cursor_x = cursor_x
-        cursor_x += test_val
+        if cursor_x + test_val > 0 and cursor_x + test_val < size.columns - 2:
+            old_cursor_x = cursor_x
+            cursor_x += test_val
         
         # update screen
         stdscr.addch(old_cursor_y, old_cursor_x, cursor_char)
@@ -202,25 +203,5 @@ async def main():
                 old_cursor_y = cursor_y
                 old_cursor_x = cursor_x
                 keypress_r()
-            case curses.KEY_UP:
-                if cursor_y > 0:
-                    old_cursor_y = cursor_y
-                    old_cursor_x = cursor_x
-                    cursor_y -= 1
-            case curses.KEY_DOWN:
-                if cursor_y < size.lines - 1:
-                    old_cursor_y = cursor_y
-                    old_cursor_x = cursor_x
-                    cursor_y += 1
-            case curses.KEY_LEFT:
-                if cursor_x > 0:
-                    old_cursor_y = cursor_y
-                    old_cursor_x = cursor_x
-                    cursor_x -= 1
-            case curses.KEY_RIGHT:
-                if cursor_x < size.columns - 2:
-                    old_cursor_y = cursor_y
-                    old_cursor_x = cursor_x
-                    cursor_x += 1
 
 asyncio.run(main())

@@ -75,6 +75,10 @@ class CharacteristicCallbacks: public BLECharacteristicCallbacks {
     }
     // reset read timeout
     lastReadTime = millis();
+    #if DEBUG
+    Serial.print("lastReadTime: ");
+    Serial.println(lastReadTime);
+    #endif
     // get new value from stm32
 
     // set new value
@@ -133,8 +137,12 @@ void setup()
 
 void loop()
 {
-  if(connected == 1 && readingStarted == 1 && (lastReadTime + READ_TIMEOUT_MS > millis()))
+  if(connected == 1 && readingStarted == 1 && (lastReadTime + READ_TIMEOUT_MS < millis()))
   {
+    #if DEBUG
+    Serial.print("millis: ");
+    Serial.print(millis());
+    #endif
     Serial.print("connected: ");
     Serial.println(connected);
     Serial.print("ReadingStarted: ");
