@@ -30,6 +30,7 @@
 
 /* Globals -------------------------------------------------------------------*/
 /* Global BLE variables */
+BLEServer* g_pServer;
 
 const char * serviceUUID = "3cd00375-4415-4fe2-aa41-42bd35f1c526";
 const char * characteristicUUID = "cc84a98c-36be-4fe1-8345-be620545fd34";
@@ -61,7 +62,7 @@ class ServerCallbacks: public BLEServerCallbacks {
       #endif
       connected = 0;
       readingStarted = 0;
-      BLEAdvertising* pAdvertising = pServer->getAdvertising
+      BLEAdvertising* pAdvertising = pServer->getAdvertising();
       pAdvertising->start();  // restart advertising
     }
 };
@@ -94,6 +95,7 @@ void timeout()
 {
   connected = 0;
   readingStarted = 0;
+  BLEAdvertising* pAdvertising = g_pServer->getAdvertising();
   pAdvertising->start();
   #if DEBUG
   Serial.println("Read timeout occured");
@@ -117,7 +119,7 @@ void setup()
   BLEDevice::init("ESP32MagicWand");
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
-
+  g_pServer = pServer;
   BLEService *pService = pServer->createService(serviceUUID);
   
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
