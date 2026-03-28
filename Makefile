@@ -1,7 +1,9 @@
 .PHONY: app
 .SILENT: app
 
-all: app stm32
+.PHONY: stm32
+
+all: stm32 app
 
 app:
 	python3.14 app/app.py
