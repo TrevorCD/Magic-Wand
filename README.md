@@ -15,7 +15,8 @@ voltage: 3-5V
 
 ### MPU-6500 Accelerometer
 voltage: 3-5V
-[datasheet](https://www.alldatasheet.com/html-pdf/1140874/TDK/MPU-6500/1463/21/MPU-6500.html)
+[datasheet](https://www.alldatasheet.com/datasheet-pdf/view/1140874/TDK/MPU-6500.html)
+[register map](https://github.com/bolderflight/invensense-imu/blob/main/docs/MPU-6500-Register-Map.pdf)
 
 ## Block Diagram
 
