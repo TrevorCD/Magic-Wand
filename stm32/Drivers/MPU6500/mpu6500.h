@@ -23,3 +23,10 @@
 /* Hardware Includes */
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
+
+
+typedef struct {
+
+	I2C_HandleTypeDef *hi2c;
+
+} MPU6500_HandleTypeDef;
