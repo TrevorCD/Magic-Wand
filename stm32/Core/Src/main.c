@@ -49,6 +49,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 MPU6500_HandleTypeDef hmpu = {0};
 MPU6500_OutputTypeDef mpu_out = {0};
+int _loops = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,6 +114,7 @@ int main(void)
 	  if(MPU6500_GetAccel(&hmpu, &mpu_out) != 0) Error_Handler();
 	  if(MPU6500_GetGyro(&hmpu, &mpu_out) != 0) Error_Handler();
 	  if(MPU6500_GetTemp(&hmpu, &mpu_out) != 0) Error_Handler();
+	  _loops++;
   }
   /* USER CODE END 3 */
 }
@@ -173,10 +175,36 @@ static void MX_I2C1_Init(void)
 {
 
   /* USER CODE BEGIN I2C1_Init 0 */
+	
+// manually clock SCL to free stuck SDA
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
+// configure SCL as output
+	GPIO_InitStruct.Pin = GPIO_PIN_8;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+// clock SCL 9 times to unstick any stuck slave
+	for(int i = 0; i < 9; i++)
+	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+		HAL_Delay(1);
+	}
   /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
+	
+  /* USER CODE BEGIN I2C1_Init 1 */	
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
