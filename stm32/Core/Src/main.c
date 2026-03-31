@@ -115,6 +115,7 @@ int main(void)
 	  if(MPU6500_GetGyro(&hmpu, &mpu_out) != 0) Error_Handler();
 	  if(MPU6500_GetTemp(&hmpu, &mpu_out) != 0) Error_Handler();
 	  _loops++;
+	  HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -196,8 +197,8 @@ static void MX_I2C1_Init(void)
 		HAL_Delay(1);
 	}
   /* USER CODE END I2C1_Init 0 */
-	
-  /* USER CODE BEGIN I2C1_Init 1 */	
+
+  /* USER CODE BEGIN I2C1_Init 1 */
   __HAL_RCC_GPIOB_CLK_ENABLE();
   GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
@@ -325,6 +326,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
