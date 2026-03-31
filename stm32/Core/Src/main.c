@@ -64,7 +64,13 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == GPIO_PIN_6)
+    {
+        MPU6500_IntCallback(&hmpu);
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -108,6 +114,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  while(hmpu.data_ready == 0)
+	  {
+		  /* SPIN */
+	  }
+	  // set data ready back to 0 in preparation for next interrupt
+	  hmpu.data_ready = 0;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -115,7 +127,6 @@ int main(void)
 	  if(MPU6500_GetGyro(&hmpu, &mpu_out) != 0) Error_Handler();
 	  if(MPU6500_GetTemp(&hmpu, &mpu_out) != 0) Error_Handler();
 	  _loops++;
-	  HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
