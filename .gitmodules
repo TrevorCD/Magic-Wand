@@ -1,3 +1,7 @@
 [submodule "stm32/Drivers/MPU6500"]
 	path = stm32/Drivers/MPU6500
 	url = https://github.com/TrevorCD/MPU-6500-STM32-Device-Driver.git
+
+[submodule "stm32/Ins"]
+	path = stm32/Ins
+	url = https://github.com/TrevorCD/Inertial-Navigation-System-C.git
