@@ -144,6 +144,8 @@ int main(void)
   pos.accel_offset.x /= offset_samples;
   pos.accel_offset.y /= offset_samples;
   pos.accel_offset.z /= offset_samples;
+  // add back in gravity
+  pos.accel_offset.z -= 1.0f;
   /* USER CODE END 2 */
 
   /* Infinite loop */
