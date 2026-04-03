@@ -23,7 +23,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 
-#define DEBUG_BLE 1
+#define DEBUG_BLE 0
 #define DEBUG_UART1 1
 
 #define READ_TIMEOUT_MS 1000
@@ -32,6 +32,7 @@
 #define UART1_MSG_LEN (sizeof(float) * 3)
 #define UART1_RX_PIN 13
 #define UART1_TX_PIN 12
+#define UART1_HEADER (0xAA)
 
 /* Globals -------------------------------------------------------------------*/
 /* Global BLE variables */
@@ -54,10 +55,10 @@ unsigned long lastReadTime;
 unsigned long lastConnectTime;
 
 /* Global UART variables */
-uint8_t UART1_rx_buf[UART1_MSG_LEN];
+uint8_t UART1_msg_buf[UART1_MSG_LEN];
 
 /* TEST */
-float TEST_UART1_rx_buf[3] = { 0.1f, 0.2f, 0.3f };
+float TEST_UART1_msg_buf[3] = { 0.1f, 0.2f, 0.3f };
 /* Helper functions ----------------------------------------------------------*/
 void timeout() {
   g_state = DISCONNECTED;
@@ -111,14 +112,13 @@ class CharacteristicCallbacks: public BLECharacteristicCallbacks {
     #endif
 
     // set new value
-    //pCharacteristic->setValue(UART1_rx_buf, UART1_MSG_LEN);
-    pCharacteristic->setValue((uint8_t*)TEST_UART1_rx_buf, UART1_MSG_LEN);
+    pCharacteristic->setValue((uint8_t*)UART1_msg_buf, UART1_MSG_LEN);
   }
 };
 
 /* Main ----------------------------------------------------------------------*/
 void setup() {
-  #if DEBUG_BLE
+  #if DEBUG_BLE || DEBUG_UART1
   Serial.begin(115200);
   #endif
   // UART setup
@@ -152,12 +152,25 @@ void loop() {
   Serial.println(g_state);
   #endif
 
-  // if buffer has full position vector, read into msg buffer
-  /*
-  if (Serial1.available() >= UART1_MSG_LEN) {
-        Serial1.readBytes((uint8_t*)UART1_msg_buf, UART1_MSG_LEN);
+  // if buffer has full position vector len + header byte, read into msg buffer
+  if (Serial1.available() >= UART1_MSG_LEN + 1) {
+    // check if header
+    if(Serial1.peek() == UART1_HEADER) {
+      Serial1.read(); // discard header byte
+      // read vector
+      Serial1.readBytes((uint8_t*)UART1_msg_buf, UART1_MSG_LEN);
+      #if DEBUG_UART1
+      float* x = (float*)UART1_msg_buf;
+      float* y = (float*)(UART1_msg_buf + sizeof(float));
+      float* z = (float*)(UART1_msg_buf + (sizeof(float) * 2));
+      Serial.printf("x: %f\ny: %f\nz: %f\n\n", *x, *y, *z);
+      #endif
+    }
+    else {
+      Serial1.read(); // discard misaligned byte
+    }
   }
-  */
+
   switch(g_state) {
     case INIT:
       pAdvertising->start();
